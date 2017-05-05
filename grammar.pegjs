@@ -38,7 +38,7 @@ statements =
 
 statement =
       // IF COND THEN STATEMENT
-      IF cond:condition THEN LEFTBRACE content:statements RIGHTBRACE {
+      IF cond:condition THEN content:block {
         return {
           "type": "IF",
           "condition": cond,
@@ -46,7 +46,7 @@ statement =
         };
       }
       // WHILE LOOP
-      / WHILE cond:condition LEFTBRACE content:statements RIGHTBRACE {
+      / WHILE cond:condition content:block {
         return {
           "type": "WHILE",
           "condition": cond,
@@ -93,7 +93,7 @@ condition
   }
 
 assign
-  = id:ID ASSIGN FUNCTION LEFTPAR args:arguments? RIGHTPAR LEFTBRACE st:statements RIGHTBRACE {
+  = id:ID ASSIGN FUNCTION LEFTPAR args:arguments? RIGHTPAR st:block {
     functions[id.value] = args;
     let funct = {
       "type": "FUNCTION",
@@ -127,6 +127,11 @@ arguments
       args.push(item[1].value);
     });
     return args;
+  }
+
+block
+  = LEFTBRACE statements:statements RIGHTBRACE {
+    return statements;
   }
 
 additive
