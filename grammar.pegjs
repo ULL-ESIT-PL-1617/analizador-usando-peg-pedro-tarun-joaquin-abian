@@ -5,14 +5,38 @@
   var functions = [];
 }
 
+start
+  = stat:statements
+  { console.log("Constants: " + util.inspect(constants) + "\n");
+    console.log("Variables: " + util.inspect(variables) + "\n");
+    console.log("Functions: " + util.inspect(functions) + "\n"); return stat; }
+
 statements =
-      left:statement right:(SC statements)*
+      left:statement right:(SC statements)* SC?
       { return left; }
 
 statement =
-      IF c:condition /*&{ console.log(c); }*/ THEN LEFTBRAC statements RIGHTBRAC
-      / WHILE c:condition LEFTBRAC statements RIGHTBRAC
-      / id:ID LEFTPAR (parameters (COMMA parameters)*)* RIGHTPAR
+      IF c:condition THEN LEFTBRAC content:statements RIGHTBRAC {
+        return {
+          "type": "IF",
+          "condition": c,
+          "content": content
+        };
+      }
+      / WHILE c:condition LEFTBRAC content:statements RIGHTBRAC {
+        return {
+          "type": "WHILE",
+          "condition": c,
+          "content": content
+        };
+      }
+      / id:ID LEFTPAR param:parameters? RIGHTPAR {
+        return {
+          "type": "FUNCTIONCALL",
+          "ID": id,
+          "paramaters": param
+        }
+      }
       / a:assign { return a; }
       / add:additive { return add; }
 
@@ -21,22 +45,72 @@ statement =
   = id:ID LEFTPAR (parameters (COMMA parameters)*)* RIGHTPAR*/
 
 parameters
-  = id:ID LEFTPAR (parameters (COMMA parameters)*)* RIGHTPAR
-    / a:additive
+  = id:ID LEFTPAR first:parameters rest:(COMMA parameters)* RIGHTPAR {
+    let args = [];
+    args.push(id.value);
+    rest.forEach(function(item){
+      args.push(item[1].value);
+    });
+    return args;
+  }
+    / a:additive { return a; }
 
 condition
-  = LEFTPAR left:additive COMPARISON right:additive RIGHTPAR
+  = LEFTPAR left:additive comp:COMPARISON right:additive RIGHTPAR {
+    return {
+      "type": comp,
+      "left": left,
+      "right": right
+    };
+  }
 
 assign
-  = CONST id:ID ASSIGN result:additive
-  / id:ID ASSIGN result:FUNCTION LEFTPAR args:arguments RIGHTPAR LEFTBRAC st:statements RIGHTBRAC
-  / id:ID ASSIGN result:additive
-
-function
-  = FUNCTION LEFTPAR args:arguments RIGHTPAR LEFTBRAC st:statements RIGHTBRAC
+  = id:ID ASSIGN FUNCTION LEFTPAR args:arguments? RIGHTPAR LEFTBRAC st:statements RIGHTBRAC {
+    let funct = {
+      "type": "FUNCTION",
+      "arguments": args,
+      "content": st
+    };
+    let tmp = {
+      "type": "=",
+      "left": id.value,
+      "right": funct
+    };
+    let tmp1 = {
+      "FUNCTION": id.value,
+      "Value": funct
+    };
+    functions.push(tmp1);
+    return tmp;
+  }
+  / cons:CONST? id:ID ASSIGN result:additive {
+    let tmp = {
+      "type": "=",
+      "left": id.value,
+      "right": result.value
+    };
+    let tmp1 = {
+      "ID": id.value,
+      "Value": result.value
+    };
+    if(cons != null) {
+      constants.push(tmp1);
+    }
+    else {
+      variables.push(tmp1);
+    }
+    return tmp;
+  }
 
 arguments
-  = (id:ID (COMMA ID)*)*
+  = id:ID rest:(COMMA ID)* {
+    let args = [];
+    args.push(id.value);
+    rest.forEach(function(item){
+      args.push(item[1].value);
+    });
+    return args;
+  }
 
 additive
   = left:multiplicative right:(ADDOP multiplicative)*
@@ -45,12 +119,16 @@ additive
       return left;
     } else {
       let arr = {};
-      let tmp = {"left": left};
+      let tmp = left;
       right.forEach(function(item){
-        tmp["left"]: tmp;
-        arr.push({type:item[0], left: left, right: item[1]});
+        let newTmp = {
+          "type": (item[0])[1],
+          "left": tmp,
+          "right": item[1]
+        };
+        tmp = newTmp;
       });
-      return arr;
+      return tmp;
     }
   }
 
@@ -60,12 +138,17 @@ multiplicative
     if(right.length == 0){
       return left;
     } else {
-      let arr = [];
-      arr.push({"type": "MULTIPL", "left": left})
+      let arr = {};
+      let tmp = left;
       right.forEach(function(item){
-        arr.push({type:item[0], right: item[1]});
+        let newTmp = {
+          "type": (item[0])[1],
+          "left": tmp,
+          "right": item[1]
+        };
+        tmp = newTmp;
       });
-      return arr;
+      return tmp;
     }
   }
 
@@ -98,5 +181,5 @@ CONST = _"const"_
 SC = _";"_
 COMPARISON = _ comp:$[<>!=][=]? _ { return comp ; }
 NUMBER = _ digits:$[0-9]+ _ { return {'type' : 'NUM', 'value' : parseInt(digits, 10)}; }
-ID = _ $([a-z_]i$([a-z0-9_]i*)) _
+ID = _ id:$([a-z_]i$([a-z0-9_]i*)) { return {'type' : 'ID', 'value' : id}; }
 ASSIGN = _ '=' _
