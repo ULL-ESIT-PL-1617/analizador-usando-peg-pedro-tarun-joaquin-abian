@@ -2,7 +2,7 @@
 var util = require('util');
 var fs = require('fs');
 var PEG = require("./grammar.js");
-var fileName = process.argv[2] || 'input1';
+var fileName = process.argv[2] || 'input2';
 var genCode = function(tree) {
   var translation = "module.exports = () = > {";
   // traverse the tree producing translation

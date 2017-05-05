@@ -45,15 +45,16 @@ statement =
   = id:ID LEFTPAR (parameters (COMMA parameters)*)* RIGHTPAR*/
 
 parameters
-  = id:ID LEFTPAR first:parameters rest:(COMMA parameters)* RIGHTPAR {
-    let args = [];
-    args.push(id.value);
+  = first:additive rest:(COMMA additive)* {
+    let params = [];
+    params.push(first);
+    //console.log(first);
     rest.forEach(function(item){
-      args.push(item[1].value);
+      params.push(item[1]);
     });
-    return args;
+    //console.log("ABAJO -> " + params);
+    return params;
   }
-    / a:additive { return a; }
 
 condition
   = LEFTPAR left:additive comp:COMPARISON right:additive RIGHTPAR {
@@ -119,12 +120,12 @@ additive
       return left;
     } else {
       let arr = {};
-      let tmp = left;
+      let tmp = left.value;
       right.forEach(function(item){
         let newTmp = {
           "type": (item[0])[1],
           "left": tmp,
-          "right": item[1]
+          "right": item[1].value
         };
         tmp = newTmp;
       });
@@ -139,12 +140,12 @@ multiplicative
       return left;
     } else {
       let arr = {};
-      let tmp = left;
+      let tmp = left.value;
       right.forEach(function(item){
         let newTmp = {
           "type": (item[0])[1],
           "left": tmp,
-          "right": item[1]
+          "right": item[1].value
         };
         tmp = newTmp;
       });
@@ -181,5 +182,5 @@ CONST = _"const"_
 SC = _";"_
 COMPARISON = _ comp:$[<>!=][=]? _ { return comp ; }
 NUMBER = _ digits:$[0-9]+ _ { return {'type' : 'NUM', 'value' : parseInt(digits, 10)}; }
-ID = _ id:$([a-z_]i$([a-z0-9_]i*)) { return {'type' : 'ID', 'value' : id}; }
+ID = _ id:$([a-z_]i$([a-z0-9_]i*)) { return {'type' : 'ID', 'value' : id }; }
 ASSIGN = _ '=' _
