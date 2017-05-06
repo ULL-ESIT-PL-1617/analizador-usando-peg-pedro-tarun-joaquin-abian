@@ -15,7 +15,7 @@
 | Joaquín Sanchiz Navarro | alu0100893755@ull.edu.es | [joaquinsanchiz](//joaquinsanchiz.github.io/) |
 
 ---
-# Gramática
+# Gramática:
 
 ```
 start
@@ -51,8 +51,11 @@ condition
   = LEFTPAR additive COMPARISON additive RIGHTPAR
 
 assign
-  = ID ASSIGN FUNCTION LEFTPAR arguments? RIGHTPAR block
+  = TYPE? ID ASSIGN function
   / TYPE? ID ASSIGN additive
+
+function
+  = FUNCTION LEFTPAR arguments? RIGHTPAR block
 
 arguments
   = ID (COMMA ID)*
