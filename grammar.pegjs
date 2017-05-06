@@ -23,158 +23,155 @@ start
     console.log("Variables: " + util.inspect(variables));
     console.log("Functions: " + util.inspect(functions)); return stat; }
 
-statements =
-      left:statement right:(SC statement)* SC?
-      {
-        if(right.length == 0)
-          return left;
-        var result = [];
-        result.push(left);
-        right.forEach(function(item){
-          result.push(item[1]);
-        });
-        return result;
-      }
-
-statement =
-      // IF COND THEN STATEMENT
-      IF cond:condition THEN content:block {
-        return {
-          "type": "IF",
-          "condition": cond,
-          "content": content
-        };
-      }
-      // WHILE LOOP
-      / WHILE cond:condition content:block {
-        return {
-          "type": "WHILE",
-          "condition": cond,
-          "content": content
-        };
-      }
-      // FUNCTION CALL
-      / functCall:functionCall  { return functCall;   }
-      // ASSIGNMENT
-      / assignment:assign       { return assignment;  }
-      // ARITHMETIC OPERATION
-      / operation:additive      { return operation;   }
-
-functionCall
-  = id:ID LEFTPAR param:parameters? RIGHTPAR {
-    return {
-      "type": "FUNCTION_CALL",
-      "id": id,
-      "paramaters": param
+statements
+  = statements:statement+ {
+      var result = [];
+      statements.forEach(function(item){
+        result.push(item);
+      });
+      return result;
     }
-  }
+
+statement
+  = c:conditional     { return c; }
+  / l:loop            { return l; }
+  / f:call        SC  { return f; }
+  / a:assign      SC  { return a; }
+  / o:additive    SC  { return o; }
+
+conditional
+  = IF cond:condition THEN content:block {
+      return {
+        "type": "IF",
+        "condition": cond,
+        "content": content
+      };
+    }
+
+loop
+  = WHILE cond:condition content:block {
+      return {
+        "type": "WHILE",
+        "condition": cond,
+        "content": content
+      };
+    }
+
+call
+  = id:ID LEFTPAR param:parameters? RIGHTPAR {
+      return {
+        "type": "FUNCTION_CALL",
+        "id": id,
+        "paramaters": param
+      }
+    }
 
 parameters
   = first:parameter rest:(COMMA parameter)* {
-    let params = [];
-    params.push(first);
-    rest.forEach(function(item){
-      params.push(item[1]);
-    });
-    return params;
-  }
+      let params = [];
+      params.push(first);
+      rest.forEach(function(item){
+        params.push(item[1]);
+      });
+      return params;
+    }
 
 parameter
-  = param:functionCall  { return param; }
-    / param:additive    { return param; }
+  = param:call      { return param; }
+  / param:additive  { return param; }
 
 condition
   = LEFTPAR left:additive comp:COMPARISON right:additive RIGHTPAR {
-    return {
-      "type": comp,
-      "left": left,
-      "right": right
-    };
-  }
+      return {
+        "type": comp,
+        "left": left,
+        "right": right
+      };
+    }
 
 assign
-  = id:ID ASSIGN FUNCTION LEFTPAR args:arguments? RIGHTPAR st:block {
-    functions[id.value] = args;
-    let funct = {
-      "type": "FUNCTION",
-      "arguments": args,
-      "content": st
-    };
-    return {
-      "type": "=",
-      "left": id,
-      "right": funct
-    };
-  }
-  / cons:CONST? id:ID ASSIGN result:additive {
-    let tmp = {
-      "type": "=",
-      "left": id,
-      "right": result
-    };
-    if(cons != null)
-      constants[id.value] = result.value;
-    else
-      variables[id.value] = result.value;
-    return tmp;
-  }
+  = type:TYPE? id:ID ASSIGN funct:function {
+      functions[id.value] = funct["arguments"];
+      return {
+        "type": "=",
+        "left": id,
+        "right": funct
+      };
+    }
+  / type:TYPE? id:ID ASSIGN result:additive {
+      if(type === "const")
+        constants[id.value] = result.value;
+      else if(type === "var")
+        variables[id.value] = result.value;
+      return {
+        "type": "=",
+        "left": id,
+        "right": result
+      };
+    }
+
+function
+  = FUNCTION LEFTPAR args:arguments? RIGHTPAR block:block {
+      return {
+        "type": "FUNCTION",
+        "arguments": args,
+        "content": block
+      };
+    }
 
 arguments
   = id:ID rest:(COMMA ID)* {
-    let args = [];
-    args.push(id.value);
-    rest.forEach(function(item){
-      args.push(item[1].value);
-    });
-    return args;
-  }
+      let args = [];
+      args.push(id.value);
+      rest.forEach(function(item){
+        args.push(item[1].value);
+      });
+      return args;
+    }
 
 block
   = LEFTBRACE statements:statements RIGHTBRACE {
-    return statements;
-  }
+      return statements;
+    }
 
 additive
-  = left:multiplicative right:(ADDOP multiplicative)*
-  {
-    if(right.length == 0){
-      return left;
-    } else {
-      let arr = {};
-      let tmp = left;
-      right.forEach(function(item){
-        let newTmp = {
-          "type": (item[0])[1],
-          "left": tmp,
-          "right": item[1]
-        };
-        tmp = newTmp;
-
-      });
-      return tmp;
+  = left:multiplicative right:(ADDOP multiplicative)* {
+      if(right.length == 0){
+        return left;
+      } else {
+        let arr = {};
+        let tmp = left;
+        right.forEach(function(item){
+          let newTmp = {
+            "type": (item[0])[1],
+            "left": tmp,
+            "right": item[1]
+          };
+          tmp = newTmp;
+        });
+        return tmp;
+      }
     }
-  }
   / multiplicative
 
 multiplicative
-  = left:primary right:(MULOP primary)*
-  {
-    if(right.length == 0){
-      return left;
-    } else {
-      let arr = {};
-      let tmp = left;
-      right.forEach(function(item){
-        let newTmp = {
-          "type": (item[0])[1],
-          "left": tmp,
-          "right": item[1]
-        };
-        tmp = newTmp;
-      });
-      return tmp;
+  = left:primary right:(MULOP primary)* {
+      if(right.length == 0){
+        return left;
+      } else {
+        let arr = {};
+        let tmp = left;
+        right.forEach(function(item){
+          let newTmp = {
+            "type": (item[0])[1],
+            "left": tmp,
+            "right": item[1]
+          };
+          tmp = newTmp;
+        });
+        return tmp;
+      }
     }
-  }
   / primary
 
 primary
@@ -204,4 +201,6 @@ SC = _";"_
 COMPARISON = _ comp:$[<>!=][=]? _ { return comp ; }
 NUMBER = _ digits:$[0-9]+ _ { return {'type' : 'NUM', 'value' : parseInt(digits, 10)}; }
 ID = _ id:$([a-z_]i$([a-z0-9_]i*)) _ { return {'type' : 'ID', 'value' : id }; }
-ASSIGN = _ '=' _
+TYPE = _ v:"var"i _   { return v; }
+     / _ c:"const"i _ { return c; }
+ASSIGN = _ "=" _
