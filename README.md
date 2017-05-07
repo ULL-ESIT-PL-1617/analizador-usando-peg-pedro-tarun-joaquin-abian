@@ -129,6 +129,241 @@ while(a > 8) {
  * Lista de constantes y sus valores
  * Lista de funciones y sus argumentos
  * Árbol de Análisis Sintáctico
+ * Resultado:
+ >
+Constants: [ a: 56 ]
+Variables: [ a: 1, c: 6, d: 7 ]
+Functions: [ b: [ 'hola', 'hola1', 'hola2', 'hola3' ] ]
+[
+  {
+    "type": "IF",
+    "condition": {
+      "type": "<",
+      "left": {
+        "type": "NUM",
+        "value": 3
+      },
+      "right": {
+        "type": "NUM",
+        "value": 5
+      }
+    },
+    "content": [
+      {
+        "type": "=",
+        "left": {
+          "type": "ID",
+          "value": "a"
+        },
+        "right": {
+          "type": "NUM",
+          "value": 4
+        }
+      }
+    ]
+  },
+  {
+    "type": "=",
+    "left": {
+      "type": "ID",
+      "value": "b"
+    },
+    "right": {
+      "type": "FUNCTION",
+      "arguments": [
+        "hola",
+        "hola1",
+        "hola2",
+        "hola3"
+      ],
+      "content": [
+        {
+          "type": "=",
+          "left": {
+            "type": "ID",
+            "value": "c"
+          },
+          "right": {
+            "type": "NUM",
+            "value": 6
+          }
+        },
+        {
+          "type": "=",
+          "left": {
+            "type": "ID",
+            "value": "d"
+          },
+          "right": {
+            "type": "NUM",
+            "value": 4
+          }
+        },
+        {
+          "type": "=",
+          "left": {
+            "type": "ID",
+            "value": "a"
+          },
+          "right": {
+            "type": "NUM",
+            "value": 1
+          }
+        }
+      ]
+    }
+  },
+  {
+    "type": "FUNCTION_CALL",
+    "id": {
+      "type": "ID",
+      "value": "b"
+    },
+    "paramaters": [
+      {
+        "type": "+",
+        "left": {
+          "type": "NUM",
+          "value": 1
+        },
+        "right": {
+          "type": "NUM",
+          "value": 2
+        }
+      },
+      {
+        "type": "/",
+        "left": {
+          "type": "NUM",
+          "value": 4
+        },
+        "right": {
+          "type": "NUM",
+          "value": 4
+        }
+      }
+    ]
+  },
+  {
+    "type": "WHILE",
+    "condition": {
+      "type": ">",
+      "left": {
+        "type": "ID",
+        "value": "a"
+      },
+      "right": {
+        "type": "NUM",
+        "value": 8
+      }
+    },
+    "content": [
+      {
+        "type": "=",
+        "left": {
+          "type": "ID",
+          "value": "c"
+        },
+        "right": {
+          "type": "NUM",
+          "value": 6
+        }
+      },
+      {
+        "type": "=",
+        "left": {
+          "type": "ID",
+          "value": "d"
+        },
+        "right": {
+          "type": "NUM",
+          "value": 7
+        }
+      },
+      {
+        "type": "=",
+        "left": {
+          "type": "ID",
+          "value": "a"
+        },
+        "right": {
+          "type": "NUM",
+          "value": 1
+        }
+      },
+      {
+        "type": "=",
+        "left": {
+          "type": "ID",
+          "value": "a"
+        },
+        "right": {
+          "type": "NUM",
+          "value": 56
+        }
+      },
+      {
+        "type": "FUNCTION_CALL",
+        "id": {
+          "type": "ID",
+          "value": "b"
+        },
+        "paramaters": [
+          {
+            "type": "+",
+            "left": {
+              "type": "NUM",
+              "value": 3
+            },
+            "right": {
+              "type": "NUM",
+              "value": 2
+            }
+          },
+          {
+            "type": "*",
+            "left": {
+              "type": "NUM",
+              "value": 66
+            },
+            "right": {
+              "type": "NUM",
+              "value": 4
+            }
+          },
+          {
+            "type": "FUNCTION_CALL",
+            "id": {
+              "type": "ID",
+              "value": "fun"
+            },
+            "paramaters": [
+              {
+                "type": "+",
+                "left": {
+                  "type": "NUM",
+                  "value": 1
+                },
+                "right": {
+                  "type": "NUM",
+                  "value": 2
+                }
+              },
+              {
+                "type": "NUM",
+                "value": 5
+              },
+              {
+                "type": "NUM",
+                "value": 67
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
 
 ### ¿Cómo Ejecutar el Programa?
 ```bash
