@@ -18,6 +18,18 @@
 
 ---
 
+
+### ¿Cómo Ejecutar el Programa?
+
+```bash
+[~/srcPLgrado/pegjs-calc-translate(master)]$ rake -T
+rake clean # rm grammar.js
+rake compile # Compile grammar.pegjs
+rake exe # Run main.js
+rake run # Run mainfromfile.js input1
+```
+
+
 # Gramática:
 
 ```
@@ -608,13 +620,4 @@ Functions: [ b: [ 'hola', 'hola1', 'hola2', 'hola3' ] ]
 
 \]
 
-### ¿Cómo Ejecutar el Programa?
-
-```bash
-[~/srcPLgrado/pegjs-calc-translate(master)]$ rake -T
-rake clean # rm grammar.js
-rake compile # Compile grammar.pegjs
-rake exe # Run main.js
-rake run # Run mainfromfile.js input1
-```
 
