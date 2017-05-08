@@ -25,7 +25,6 @@
 [~/srcPLgrado/pegjs-calc-translate(master)]$ rake -T
 rake clean # rm grammar.js
 rake compile # Compile grammar.pegjs
-rake exe # Run main.js
 rake run # Run mainfromfile.js input1
 ```
 
